@@ -1,0 +1,8 @@
+venv/
+venv38/
+newenv/
+.venv/
+__pycache__/
+*.pyc
+node_modules/
+.env
