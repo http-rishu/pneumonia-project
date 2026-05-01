@@ -17,14 +17,14 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 print("🚀 Starting Pneumonia API...")
 
-# ❌ Disable heavy model loading for Render free plan
+# Disable model (safe deploy)
 model = None
 
-# 🔥 Dummy prediction (safe)
+# Dummy prediction
 def dummy_predict():
     return float(np.random.rand())
 
-# 🔥 Severity calculation
+# Severity calculation
 def calculate_severity(prob):
     if prob < 0.3:
         return "Mild"
@@ -33,7 +33,7 @@ def calculate_severity(prob):
     else:
         return "Severe"
 
-# ✅ Health API
+# Health API
 @app.route("/api/health", methods=["GET"])
 def health_check():
     return jsonify({
@@ -41,7 +41,7 @@ def health_check():
         "message": "Pneumonia Detection API is running 🚀"
     })
 
-# ✅ Prediction API
+# Prediction API
 @app.route("/api/predict", methods=["POST"])
 def predict():
     try:
@@ -62,14 +62,14 @@ def predict():
                 "success": False
             }), 400
 
-        # Image preprocessing
+        # Image processing
         img = Image.open(file.stream).convert("RGB")
         img = img.resize((128, 128))
 
         img_array = np.array(img) / 255.0
         img_array = np.expand_dims(img_array, axis=0)
 
-        # 🔥 Always use dummy prediction (safe for deploy)
+        # Dummy prediction
         pred = dummy_predict()
 
         result = "PNEUMONIA" if pred > 0.5 else "NORMAL"
@@ -88,13 +88,12 @@ def predict():
         })
 
     except Exception as e:
-        print("Error:", str(e))
         return jsonify({
             "error": str(e),
             "success": False
         }), 500
 
-# ✅ Serve frontend
+# Serve frontend
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve_react(path):
@@ -102,7 +101,7 @@ def serve_react(path):
         return send_from_directory(app.static_folder, path)
     return send_from_directory(app.static_folder, "index.html")
 
-# 🚀 Run server
+# Run server
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
