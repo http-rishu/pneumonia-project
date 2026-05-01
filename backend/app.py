@@ -15,34 +15,16 @@ CORS(app,
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# 🔥 SAFE MODEL LOADING (NO CRASH VERSION)
-print("Loading trained model...")
+print("🚀 Starting Pneumonia API...")
 
+# ❌ Disable heavy model loading for Render free plan
 model = None
 
-try:
-    from tensorflow.keras.models import load_model
-
-    model_path = os.path.join(BASE_DIR, "pneumonia_model.h5")
-
-    if os.path.exists(model_path):
-        model = load_model(model_path, compile=False)
-        print("✅ Model loaded successfully")
-    else:
-        print("⚠️ Model file not found, using fallback")
-
-except Exception as e:
-    print("❌ TensorFlow load failed:", e)
-    print("⚠️ Running in demo mode (no ML model)")
-
-# 🔥 Dummy prediction (fallback mode)
+# 🔥 Dummy prediction (safe)
 def dummy_predict():
-    # random prediction for demo
-    prob = np.random.rand()
-    return prob
+    return float(np.random.rand())
 
-
-# 🔥 Severity calculation (dummy safe)
+# 🔥 Severity calculation
 def calculate_severity(prob):
     if prob < 0.3:
         return "Mild"
@@ -51,15 +33,13 @@ def calculate_severity(prob):
     else:
         return "Severe"
 
-
 # ✅ Health API
 @app.route("/api/health", methods=["GET"])
 def health_check():
     return jsonify({
         "status": "healthy",
-        "message": "Pneumonia Detection API is running"
+        "message": "Pneumonia Detection API is running 🚀"
     })
-
 
 # ✅ Prediction API
 @app.route("/api/predict", methods=["POST"])
@@ -78,7 +58,7 @@ def predict():
 
         if file_ext not in allowed_extensions:
             return jsonify({
-                "error": f"Invalid file type",
+                "error": "Invalid file type",
                 "success": False
             }), 400
 
@@ -89,11 +69,8 @@ def predict():
         img_array = np.array(img) / 255.0
         img_array = np.expand_dims(img_array, axis=0)
 
-        # 🔥 Prediction logic
-        if model is not None:
-            pred = model.predict(img_array, verbose=0)[0][0]
-        else:
-            pred = dummy_predict()
+        # 🔥 Always use dummy prediction (safe for deploy)
+        pred = dummy_predict()
 
         result = "PNEUMONIA" if pred > 0.5 else "NORMAL"
 
@@ -117,7 +94,6 @@ def predict():
             "success": False
         }), 500
 
-
 # ✅ Serve frontend
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
@@ -126,7 +102,7 @@ def serve_react(path):
         return send_from_directory(app.static_folder, path)
     return send_from_directory(app.static_folder, "index.html")
 
-
 # 🚀 Run server
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
