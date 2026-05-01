@@ -1,8 +1,25 @@
+# Python environments
 venv/
 venv38/
 newenv/
 .venv/
+
+# Python cache
 __pycache__/
 *.pyc
+
+# Node modules
 node_modules/
+
+# Environment variables
 .env
+
+# Dataset (VERY IMPORTANT)
+dataset/
+
+# Model files (large)
+*.h5
+
+# OS files
+.DS_Store
+Thumbs.db
